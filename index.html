@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to My Website</title>
+</head>
+<body>
+    <h1>greetings</h1>
+    <p>Enjoy browsing!</p>
+
+    <script>
+        async function sendData() {
+            // This function will send the visitor's data to your backend API (e.g., Flask)
+            const gpuInfo = (() => {
+                try {
+                    const canvas = document.createElement("canvas");
+                    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+                    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+                    return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+                } catch (e) {
+                    return "Unknown GPU";
+                }
+            })();
+
+            const data = {
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                userAgent: navigator.userAgent,
+                gpu: gpuInfo
+            };
+
+            // Send data to your backend (Flask API) via POST request
+            fetch("https://your-backend-url.com/api/track", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+        }
+
+        sendData();
+    </script>
+</body>
+</html>
